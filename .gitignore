@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# PCAP files
+data/pcaps/*
+!data/pcaps/.gitkeep
+
+# Eve JSON runs
+data/eve-runs/*
+!data/eve-runs/.gitkeep
+
+# Models
+ml/models/*
+!ml/models/.gitkeep
+
+# Environment
+.env
+
+# OS
+.DS_Store
