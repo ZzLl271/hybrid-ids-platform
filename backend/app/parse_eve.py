@@ -55,6 +55,14 @@ def parse_eve_flows(eve_path: Path) -> list[dict[str, Any]]:
     return flows
 
 
+def write_jsonl(flows: list[dict[str, Any]], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with output_path.open("w", encoding="utf-8") as f:
+        for flow in flows:
+            f.write(json.dumps(flow, ensure_ascii=False) + "\n")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Parse Suricata eve.json and normalize flow events."
@@ -62,6 +70,11 @@ def main() -> None:
     parser.add_argument(
         "eve_json",
         help="Path to Suricata eve.json file",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        help="Optional output path for normalized flow JSONL file",
     )
 
     args = parser.parse_args()
@@ -72,10 +85,15 @@ def main() -> None:
 
     flows = parse_eve_flows(eve_path)
 
-    for flow in flows:
-        print(json.dumps(flow, ensure_ascii=False))
+    if args.output:
+        output_path = Path(args.output)
+        write_jsonl(flows, output_path)
+        print(f"[+] Wrote {len(flows)} normalized flows to {output_path}")
+    else:
+        for flow in flows:
+            print(json.dumps(flow, ensure_ascii=False))
 
-    print(f"[+] Parsed {len(flows)} flow events from {eve_path}", file=sys.stderr)
+        print(f"[+] Parsed {len(flows)} flow events from {eve_path}", file=sys.stderr)
 
 
 if __name__ == "__main__":
