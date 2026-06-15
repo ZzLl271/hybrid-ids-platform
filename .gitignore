@@ -16,6 +16,10 @@ data/pcaps/*
 data/eve-runs/*
 !data/eve-runs/.gitkeep
 
+# Normalized parser outputs
+data/normalized/*
+!data/normalized/.gitkeep
+
 # Models
 ml/models/*
 !ml/models/.gitkeep
