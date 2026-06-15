@@ -3,6 +3,7 @@
 import argparse
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -115,6 +116,28 @@ def print_pretty_table(flows: list[dict[str, Any]]) -> None:
         print("  ".join(values[i].ljust(widths[i]) for i in range(len(headers))))
 
 
+def print_summary(flows: list[dict[str, Any]]) -> None:
+    proto_counts = Counter(flow.get("proto") or "UNKNOWN" for flow in flows)
+    alerted_count = sum(1 for flow in flows if flow.get("alerted") is True)
+
+    total_bytes_toserver = sum(flow.get("bytes_toserver") or 0 for flow in flows)
+    total_bytes_toclient = sum(flow.get("bytes_toclient") or 0 for flow in flows)
+    total_bytes = total_bytes_toserver + total_bytes_toclient
+
+    print("Flow Summary")
+    print("============")
+    print(f"Total flows: {len(flows)}")
+    print(f"Alerted flows: {alerted_count}")
+    print(f"Total bytes: {total_bytes}")
+    print(f"Bytes to server: {total_bytes_toserver}")
+    print(f"Bytes to client: {total_bytes_toclient}")
+
+    print()
+    print("Protocol counts:")
+    for proto, count in proto_counts.most_common():
+        print(f"  {proto}: {count}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Parse Suricata eve.json and normalize flow events."
@@ -133,6 +156,11 @@ def main() -> None:
         action="store_true",
         help="Print a readable flow summary table",
     )
+    parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="Print aggregate flow statistics",
+    )
 
     args = parser.parse_args()
     eve_path = Path(args.eve_json)
@@ -150,6 +178,9 @@ def main() -> None:
     elif args.pretty:
         print_pretty_table(flows)
         print(f"[+] Parsed {len(flows)} flow events from {eve_path}")
+
+    elif args.summary:
+        print_summary(flows)
 
     else:
         for flow in flows:
