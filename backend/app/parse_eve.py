@@ -63,6 +63,58 @@ def write_jsonl(flows: list[dict[str, Any]], output_path: Path) -> None:
             f.write(json.dumps(flow, ensure_ascii=False) + "\n")
 
 
+def endpoint(ip: Any, port: Any) -> str:
+    if ip is None:
+        return "-"
+
+    if port is None:
+        return str(ip)
+
+    return f"{ip}:{port}"
+
+
+def print_pretty_table(flows: list[dict[str, Any]]) -> None:
+    headers = [
+        "SRC",
+        "DEST",
+        "PROTO",
+        "APP",
+        "PKTS_TS",
+        "PKTS_TC",
+        "BYTES_TS",
+        "BYTES_TC",
+        "STATE",
+        "ALERTED",
+    ]
+
+    rows = []
+    for flow in flows:
+        rows.append(
+            [
+                endpoint(flow.get("src_ip"), flow.get("src_port")),
+                endpoint(flow.get("dest_ip"), flow.get("dest_port")),
+                flow.get("proto") or "-",
+                flow.get("app_proto") or "-",
+                flow.get("pkts_toserver"),
+                flow.get("pkts_toclient"),
+                flow.get("bytes_toserver"),
+                flow.get("bytes_toclient"),
+                flow.get("flow_state") or "-",
+                flow.get("alerted"),
+            ]
+        )
+
+    table = [headers] + [[str(value) for value in row] for row in rows]
+    widths = [max(len(row[i]) for row in table) for i in range(len(headers))]
+
+    print("  ".join(headers[i].ljust(widths[i]) for i in range(len(headers))))
+    print("  ".join("-" * widths[i] for i in range(len(headers))))
+
+    for row in rows:
+        values = [str(value) for value in row]
+        print("  ".join(values[i].ljust(widths[i]) for i in range(len(headers))))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Parse Suricata eve.json and normalize flow events."
@@ -75,6 +127,11 @@ def main() -> None:
         "--output",
         "-o",
         help="Optional output path for normalized flow JSONL file",
+    )
+    parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Print a readable flow summary table",
     )
 
     args = parser.parse_args()
@@ -89,6 +146,11 @@ def main() -> None:
         output_path = Path(args.output)
         write_jsonl(flows, output_path)
         print(f"[+] Wrote {len(flows)} normalized flows to {output_path}")
+
+    elif args.pretty:
+        print_pretty_table(flows)
+        print(f"[+] Parsed {len(flows)} flow events from {eve_path}")
+
     else:
         for flow in flows:
             print(json.dumps(flow, ensure_ascii=False))
