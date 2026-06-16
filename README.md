@@ -56,3 +56,43 @@ Current parser extracts:
 
 This proves the next stage of the pipeline works:
 eve.json -> Python parser -> normalized flow JSONL / table / summary
+
+## Sprint 1C: DNS Event Parser
+
+Parse Suricata `eve.json` DNS events into normalized records:
+
+```bash
+python3 backend/app/parse_dns.py data/eve-runs/test-004/eve.json
+```
+
+Print a human-readable DNS table:
+```bash
+python3 backend/app/parse_dns.py data/eve-runs/test-004/eve.json --pretty
+```
+
+Print aggregate DNS statistics:
+```bash
+python3 backend/app/parse_dns.py data/eve-runs/test-004/eve.json --summary
+
+Save normalized DNS events as JSONL:
+```bash
+python3 backend/app/parse_dns.py data/eve-runs/test-004/eve.json --output data/normalized/test-004-dns.jsonl
+```
+
+Current DNS parser extracts:
+	timestamp
+	src_ip
+	src_port
+	dest_ip
+	dest_port
+	proto
+	dns_type
+	dns_id
+	rrname
+	rrtype
+	rcode
+	answers_count
+	answers
+
+This proves the DNS parsing stage works:
+eve.json -> DNS parser -> normalized DNS JSONL / table / summary
