@@ -14,6 +14,12 @@ if [ ! -f "$PCAP_FILE" ]; then
   exit 1
 fi
 
+if [ -d "$OUT_DIR" ]; then
+  echo "[!] Output dir already exists: $OUT_DIR"
+  echo "[!] Remove it first or use a new run name."
+  exit 1
+fi
+
 mkdir -p "$OUT_DIR"
 
 docker run --rm \
