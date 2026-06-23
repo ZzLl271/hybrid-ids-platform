@@ -1,0 +1,143 @@
+<mxfile host="app.diagrams.net" modified="2026-06-23T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="final-architecture" name="Planned Final Architecture">
+    <mxGraphModel dx="1600" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Planned Final Hybrid IDS Architecture" style="text;html=1;strokeColor=none;fillColor=none;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="460" y="30" width="680" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="scope-note" value="Final target architecture. Current repository implements Phase 1 ingestion and parser layer only." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=center;" vertex="1" parent="1">
+          <mxGeometry x="420" y="80" width="760" height="46" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="frontend" value="Frontend Container&#xa;React + Vite" style="swimlane;whiteSpace=wrap;html=1;rounded=1;fillColor=#e8f0fe;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="160" width="1420" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="dash" value="Real-time Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="35" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="attack" value="Attack Chain&#xa;Visualization" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="205" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="explain" value="ML Alert&#xa;Explainability" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="375" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="replay-ui" value="Traffic Replay&#xa;Control" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="545" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="model-ui" value="Model&#xa;Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="715" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="history" value="Historical&#xa;Analysis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="885" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="alarm-ui" value="Alarm&#xa;Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="1055" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="monitor" value="System&#xa;Monitoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="frontend">
+          <mxGeometry x="1225" y="55" width="150" height="48" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ml" value="ML Container" style="swimlane;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="420" width="360" height="230" as="geometry"/>
+        </mxCell>
+        <mxCell id="feature" value="Feature Engineering" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="ml">
+          <mxGeometry x="80" y="50" width="200" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="iso" value="Isolation Forest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="ml">
+          <mxGeometry x="80" y="110" width="200" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="shap" value="Anomaly Engine + SHAP Explainer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="ml">
+          <mxGeometry x="50" y="170" width="260" height="42" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="backend" value="FastAPI Backend Container" style="swimlane;whiteSpace=wrap;html=1;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="405" width="470" height="290" as="geometry"/>
+        </mxCell>
+        <mxCell id="tailer" value="EVE.JSON Log Tailer + Distributor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="backend">
+          <mxGeometry x="85" y="45" width="300" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="tlsfeat" value="TLS Feature Extraction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="backend">
+          <mxGeometry x="105" y="105" width="260" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="mitre" value="MITRE ATT&amp;CK Metadata Association" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="backend">
+          <mxGeometry x="90" y="165" width="290" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="batch" value="Scheduled Batch Writer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="backend">
+          <mxGeometry x="50" y="230" width="175" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="alert-engine" value="Unified Alert Engine&#xa;Rule + ML Fusion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="backend">
+          <mxGeometry x="250" y="230" width="185" height="42" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="storage" value="Storage Containers" style="swimlane;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="770" width="450" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="postgres" value="PostgreSQL&#xa;ATT&amp;CK Knowledge Base + History" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="storage">
+          <mxGeometry x="45" y="60" width="175" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="redis" value="Redis&#xa;Alert Queue / Buffer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="storage">
+          <mxGeometry x="255" y="60" width="155" height="52" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="host" value="Host Environment&#xa;Ubuntu VM" style="swimlane;whiteSpace=wrap;html=1;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="420" width="310" height="235" as="geometry"/>
+        </mxCell>
+        <mxCell id="pcap-repo" value="PCAP Repository / Test Datasets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;" vertex="1" parent="host">
+          <mxGeometry x="55" y="48" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="tcpreplay" value="Traffic Replay Engine&#xa;tcpreplay" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;" vertex="1" parent="host">
+          <mxGeometry x="55" y="113" width="200" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="nic" value="Network Interface /&#xa;Inbound Traffic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;" vertex="1" parent="host">
+          <mxGeometry x="55" y="182" width="200" height="42" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="suricata" value="Suricata IDS Container Group&#xa;Host Network Mode" style="swimlane;whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="760" width="310" height="250" as="geometry"/>
+        </mxCell>
+        <mxCell id="rule-updater" value="Rule Updater Sidecar&#xa;ET Open + JA3 fingerprints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="suricata">
+          <mxGeometry x="40" y="50" width="230" height="58" as="geometry"/>
+        </mxCell>
+        <mxCell id="suricata-engine" value="Suricata IDS Container&#xa;Captures traffic and outputs eve.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="suricata">
+          <mxGeometry x="40" y="150" width="230" height="64" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" value="HTTP REST / WebSocket" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="frontend" target="backend">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="Flow + TLS Features" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="tailer" target="ml">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" value="Predictions + SHAP Values" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="ml" target="alert-engine">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" value="Batch Write" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="batch" target="postgres">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" value="Buffered Alerts" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="alert-engine" target="redis">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" value="Invoke Replay" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="replay-ui" target="tcpreplay">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" value="Traffic" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="nic" target="suricata-engine">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" value="EVE.JSON mounted volume or API" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="suricata-engine" target="tailer">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" value="Rule Updates" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="rule-updater" target="suricata-engine">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" value="PCAP Replay" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="pcap-repo" target="tcpreplay">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" value="Replay Traffic" style="endArrow=block;html=1;rounded=0;strokeColor=#666666;" edge="1" parent="1" source="tcpreplay" target="nic">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,15 +1,14 @@
 # Suricata Setup
 
-This project uses Suricata through Docker.
-
-Image:
+This project runs Suricata through Docker.
 
 ```text
-jasonish/suricata:7.0
+Image: jasonish/suricata:7.0
+Verified version: Suricata 7.0.15 RELEASE
 ```
 
-Verified version:
+The local runner script is:
 
 ```text
-Suricata 7.0.15 RELEASE
+scripts/run_suricata_pcap.sh
 ```
