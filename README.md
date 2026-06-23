@@ -133,7 +133,7 @@ Parse Suricata HTTP events:
 ```bash
 python3 backend/app/parse_http.py data/eve-runs/test-004/eve.json --summary
 python3 backend/app/parse_http.py data/eve-runs/test-004/eve.json --pretty
-python3 backend/app/parse_http.py data/eve-runs/test-004/eve.json --output data/normalized test-004-http.jsonl
+python3 backend/app/parse_http.py data/eve-runs/test-004/eve.json --output data/normalized/test-004-http.jsonl
 ```
 
 Parse Suricata TLS events:
