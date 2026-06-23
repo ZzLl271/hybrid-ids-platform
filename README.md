@@ -73,7 +73,7 @@ python3 backend/app/parse_dns.py data/eve-runs/test-004/eve.json --pretty
 Print aggregate DNS statistics:
 ```bash
 python3 backend/app/parse_dns.py data/eve-runs/test-004/eve.json --summary
-
+```
 Save normalized DNS events as JSONL:
 ```bash
 python3 backend/app/parse_dns.py data/eve-runs/test-004/eve.json --output data/normalized/test-004-dns.jsonl
@@ -96,3 +96,44 @@ Current DNS parser extracts:
 
 This proves the DNS parsing stage works:
 eve.json -> DNS parser -> normalized DNS JSONL / table / summary
+
+## Sprint 1D: HTTP, TLS, and Alert Parsers
+
+Parse Suricata HTTP events:
+
+```bash
+python3 backend/app/parse_http.py data/eve-runs/test-004/eve.json --summary
+python3 backend/app/parse_http.py data/eve-runs/test-004/eve.json --pretty
+python3 backend/app/parse_http.py data/eve-runs/test-004/eve.json --output data/normalized test-004-http.jsonl
+```
+
+Parse Suricata TLS events:
+```bash
+python3 backend/app/parse_tls.py data/eve-runs/test-004/eve.json --summary
+python3 backend/app/parse_tls.py data/eve-runs/test-004/eve.json --pretty
+python3 backend/app/parse_tls.py data/eve-runs/test-004/eve.json --output data/normalized/test-004-tls.jsonl
+```
+
+Parse Suricata alert events and classify known checksum alerts as noise:
+```bash
+python3 backend/app/parse_alert.py data/eve-runs/test-004/eve.json --summary
+python3 backend/app/parse_alert.py data/eve-runs/test-004/eve.json --pretty --limit 20
+python3 backend/app/parse_alert.py data/eve-runs/test-004/eve.json --output data/normalized/test-004-alerts.jsonl
+```
+Current event parsers:
+	Flow  -> backend/app/parse_eve.py
+	DNS   -> backend/app/parse_dns.py
+	HTTP  -> backend/app/parse_http.py
+	TLS   -> backend/app/parse_tls.py
+	Alert -> backend/app/parse_alert.py
+
+The current pipeline supports:
+	PCAP
+	-> Suricata Docker
+	-> eve.json
+	-> normalized Flow / DNS / HTTP / TLS / Alert records
+	-> JSONL output / pretty tables / summary statistics
+
+Known checksum alerts are currently classified as noise:
+	SURICATA TCPv4 invalid checksum
+	SURICATA UDPv4 invalid checksum
