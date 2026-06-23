@@ -25,3 +25,5 @@ docs/final-architecture.drawio
 ```
 
 This diagram shows the intended full system design. It includes later components such as the backend API, storage, frontend dashboard, ML scoring, and alert management. These components are design targets and are not implemented in the current Phase 1 repository yet.
+
+In the final architecture diagram, solid blocks represent the semester delivery target. Faded or dashed blocks marked as Future Work represent long-term features outside the current semester scope.
