@@ -1,14 +1,14 @@
 <mxfile host="app.diagrams.net" modified="2026-06-23T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
-  <diagram id="final-architecture" name="Planned Final Architecture">
+  <diagram id="final-architecture" name="Long-Term Architecture Concept">
     <mxGraphModel dx="1700" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1200" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
 
-        <mxCell id="title" value="Planned Final Hybrid IDS Architecture" style="text;html=1;strokeColor=none;fillColor=none;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="title" value="Long-Term Hybrid IDS Architecture Concept" style="text;html=1;strokeColor=none;fillColor=none;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
           <mxGeometry x="490" y="30" width="720" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="scope-note" value="Solid blocks = Semester deliverable. Faded / Future Work blocks = long-term targets, not implemented this semester.&#xa;Current repository implements Phase 1 ingestion and parser layer only." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=center;" vertex="1" parent="1">
+        <mxCell id="scope-note" value="Long-term concept. Semester commitments are defined in docs/semester-scope.md, not by block styling.&#xa;Current repository implements Phase 1 ingestion and event-specific parsing only." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=center;" vertex="1" parent="1">
           <mxGeometry x="390" y="80" width="920" height="58" as="geometry"/>
         </mxCell>
 
@@ -110,7 +110,7 @@
         <mxCell id="redis" value="Redis&#xa;Alert Queue / Buffer&#xa;peak shaving" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" vertex="1" parent="storage">
           <mxGeometry x="335" y="62" width="220" height="74" as="geometry"/>
         </mxCell>
-        <mxCell id="storage-note" value="Full raw events stored as local JSONL files this semester. ClickHouse is a long-term storage target." style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#666666;align=center;whiteSpace=wrap;" vertex="1" parent="storage">
+        <mxCell id="storage-note" value="Raw events remain local JSONL files. Storage services shown here are future concepts." style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#666666;align=center;whiteSpace=wrap;" vertex="1" parent="storage">
           <mxGeometry x="55" y="145" width="500" height="28" as="geometry"/>
         </mxCell>
 

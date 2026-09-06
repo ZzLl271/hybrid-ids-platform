@@ -68,5 +68,8 @@ Raw PCAP files, generated `eve.json` files, and normalized output files are excl
 
 - Decide on a shared schema for normalized events.
 - Start extracting basic numeric features from flow records.
-- Add an API or storage layer after the parser output format is stable.
+- Build a reproducible feature dataset, basic anomaly scoring, and alert
+  context as described in [semester-scope.md](semester-scope.md).
+- Consider an API or storage layer only as a stretch goal after the core
+  pipeline is working.
 - Connect later phases to the final architecture diagram only after each component is implemented.

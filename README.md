@@ -27,8 +27,59 @@ PCAP -> Suricata Docker -> eve.json -> Python parsers -> JSONL / table / summary
 ## Architecture Diagrams
 
 - Current Phase 1 diagram: `docs/phase1-architecture.drawio`
-- Planned final architecture: `docs/final-architecture.drawio`
+- Long-term architecture concept: `docs/final-architecture.drawio`
 - Notes on diagram scope: `docs/architecture.md`
+
+## Project Records
+
+- [Pre-semester baseline](docs/semester-baseline.md): implemented starting point,
+  repository evidence, and student-confirmed homelab environment.
+- [Semester scope](docs/semester-scope.md): core pipeline deliverables and
+  optional future extensions.
+- [AI usage](docs/ai-usage.md): assistance used, evidence boundaries, and
+  responsibility for the work.
+
+These are public project records. Private course submissions, recordings,
+supervisor information, and raw homelab traffic remain outside the repository.
+The semester scope document defines the delivery commitment; the long-term
+diagram does not make every depicted service a semester requirement.
+
+## Requirements
+
+Run the commands below from the repository root.
+
+### Parser Demo
+
+The parser scripts require:
+
+- Python 3.10+
+- Verified with Python 3.12.10
+- No third-party Python packages are required; the current parsers use only the Python standard library
+
+The included sanitized sample can be used directly:
+
+```text
+samples/eve-demo.json
+```
+
+### Full PCAP Pipeline
+
+Running the complete PCAP-to-Suricata workflow requires:
+
+- Bash
+- Docker with the Docker service running
+- Permission to run Docker
+- `jq`
+- `sudo` access for correcting ownership of generated Suricata files
+
+Input PCAP files should be placed under:
+
+```text
+data/pcaps/
+```
+
+Run the Suricata workflow from the repository root because the helper script
+uses repository-relative paths for PCAP input and generated output.
 
 ## Run Suricata On A PCAP
 
@@ -78,6 +129,7 @@ python3 backend/app/parse_alert.py samples/eve-demo.json --output data/normalize
 
 ## Notes
 
-- The current work is limited to ingestion and normalization.
+- The current work is limited to ingestion and event-specific parser
+  normalization; a shared cross-event normalizer is planned semester work.
 - The sample log is only for parser testing; it is not meant to represent a full network dataset.
 - Checksum-related Suricata alerts are treated as parser noise for this prototype.

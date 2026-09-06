@@ -27,5 +27,8 @@ ml/models/*
 # Environment
 .env
 
+# Local task records
+/docs/tasks.md
+
 # OS
 .DS_Store
