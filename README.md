@@ -39,10 +39,6 @@ PCAP -> Suricata Docker -> eve.json -> Python parsers -> JSONL / table / summary
 - [AI usage](docs/ai-usage.md): assistance used, evidence boundaries, and
   responsibility for the work.
 
-These are public project records. Private course submissions, recordings,
-supervisor information, and raw homelab traffic remain outside the repository.
-The semester scope document defines the delivery commitment; the long-term
-diagram does not make every depicted service a semester requirement.
 
 ## Requirements
 
