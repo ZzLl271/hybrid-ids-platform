@@ -1,103 +1,38 @@
 # Hybrid IDS Platform
 
-This repository contains the Phase 1 work for a Hybrid IDS project.
+## Overview
 
-Current scope: Suricata PCAP processing and Python-based `eve.json` event parsing.
+This project is a prototype hybrid intrusion detection system.
 
-The full system architecture also includes a backend API, storage, frontend dashboard, ML scoring, and alert management. Those parts are design targets, not completed code in this repository yet.
+The goal is to combine Suricata rule-based detection with machine learning anomaly detection.
 
-## What Is Included
+Right now, it can process PCAP files with Suricata and parse flow, DNS, HTTP, TLS, and alert events from eve.json.
 
-- `scripts/run_suricata_pcap.sh` runs Suricata in Docker against a local PCAP.
-- `backend/app/parse_eve.py` parses flow events.
-- `backend/app/parse_dns.py` parses DNS events.
-- `backend/app/parse_http.py` parses HTTP events.
-- `backend/app/parse_tls.py` parses TLS events.
-- `backend/app/parse_alert.py` parses alert events and marks known checksum alerts as noise.
-- `samples/eve-demo.json` is a sanitized sample log for testing the parsers.
+## Current Status
 
-Raw PCAPs and generated logs are not committed because they can contain local network details.
+The current working pipeline is:
 
-## Basic Pipeline
+`PCAP -> Suricata -> eve.json -> Python parsers`
 
-```text
-PCAP -> Suricata Docker -> eve.json -> Python parsers -> JSONL / table / summary
-```
-
-## Architecture Diagrams
-
-- Current Phase 1 diagram: `docs/phase1-architecture.drawio`
-- Long-term architecture concept: `docs/final-architecture.drawio`
-- Notes on diagram scope: `docs/architecture.md`
-
-## Project Records
-
-- [Pre-semester baseline](docs/semester-baseline.md): implemented starting point,
-  repository evidence, and student-confirmed homelab environment.
-- [Semester scope](docs/semester-scope.md): core pipeline deliverables and
-  optional future extensions.
-- [AI usage](docs/ai-usage.md): assistance used, evidence boundaries, and
-  responsibility for the work.
-
-These are public project records. Private course submissions, recordings,
-supervisor information, and raw homelab traffic remain outside the repository.
-The semester scope document defines the delivery commitment; the long-term
-diagram does not make every depicted service a semester requirement.
+The machine learning part and the rest of the platform are still future work.
 
 ## Requirements
 
-Run the commands below from the repository root.
+For the Python parsers:
+- Python 3.10 or newer
+- No external Python packages are required
 
-### Parser Demo
-
-The parser scripts require:
-
-- Python 3.10+
-- Verified with Python 3.12.10
-- No third-party Python packages are required; the current parsers use only the Python standard library
-
-The included sanitized sample can be used directly:
-
-```text
-samples/eve-demo.json
-```
-
-### Full PCAP Pipeline
-
-Running the complete PCAP-to-Suricata workflow requires:
-
+For the full PCAP pipeline:
 - Bash
-- Docker with the Docker service running
-- Permission to run Docker
-- `jq`
-- `sudo` access for correcting ownership of generated Suricata files
+- Docker
+- jq
+- Permission to run Docker and `sudo`
 
-Input PCAP files should be placed under:
+Run everything from the repository root, and put PCAP files in `data/pcaps/`.
 
-```text
-data/pcaps/
-```
+## Quick Start
 
-Run the Suricata workflow from the repository root because the helper script
-uses repository-relative paths for PCAP input and generated output.
-
-## Run Suricata On A PCAP
-
-Place a test PCAP under `data/pcaps/`, then run:
-
-```bash
-scripts/run_suricata_pcap.sh data/pcaps/benign_test.pcap test-001
-```
-
-The script writes Suricata output to:
-
-```text
-data/eve-runs/test-001/
-```
-
-## Test The Parsers
-
-Use the included sample file:
+The included sample `eve.json` file can be used to test the parsers without running Suricata:
 
 ```bash
 python3 backend/app/parse_eve.py samples/eve-demo.json --summary
@@ -107,29 +42,37 @@ python3 backend/app/parse_tls.py samples/eve-demo.json --summary
 python3 backend/app/parse_alert.py samples/eve-demo.json --summary
 ```
 
-Readable table output is also available:
+To process a PCAP with Suricata:
 
 ```bash
-python3 backend/app/parse_eve.py samples/eve-demo.json --pretty
-python3 backend/app/parse_dns.py samples/eve-demo.json --pretty
-python3 backend/app/parse_http.py samples/eve-demo.json --pretty
-python3 backend/app/parse_tls.py samples/eve-demo.json --pretty
-python3 backend/app/parse_alert.py samples/eve-demo.json --pretty
+scripts/run_suricata_pcap.sh data/pcaps/benign_test.pcap test-001
 ```
 
-To save normalized JSONL output:
+## Output and Verification
 
-```bash
-python3 backend/app/parse_eve.py samples/eve-demo.json --output data/normalized/demo-flows.jsonl
-python3 backend/app/parse_dns.py samples/eve-demo.json --output data/normalized/demo-dns.jsonl
-python3 backend/app/parse_http.py samples/eve-demo.json --output data/normalized/demo-http.jsonl
-python3 backend/app/parse_tls.py samples/eve-demo.json --output data/normalized/demo-tls.jsonl
-python3 backend/app/parse_alert.py samples/eve-demo.json --output data/normalized/demo-alerts.jsonl
+The parser commands print a summary of the matching event type.
+
+A successful Suricata run creates a new folder under `data/eve-runs/`. The main output file is:
+
+```text
+data/eve-runs/test-001/eve.json
 ```
 
-## Notes
+The script also prints an event type summary at the end.
 
-- The current work is limited to ingestion and event-specific parser
-  normalization; a shared cross-event normalizer is planned semester work.
-- The sample log is only for parser testing; it is not meant to represent a full network dataset.
-- Checksum-related Suricata alerts are treated as parser noise for this prototype.
+If the PCAP file does not exist, the output directory already exists, or Suricata fails, the script stops with an error.
+
+
+## Limitations
+
+The project currently works with offline PCAP files and does not monitor live network traffic.
+
+The machine learning detection, backend API, database, and dashboard are not implemented yet.
+
+The included `eve-demo.json` is only a small test file for parser verification.
+
+## Documentation
+
+* `docs/baseline.md` — what was already completed before the semester
+* `docs/scope.md` — planned semester work and project boundaries
+* `docs/architecture.md` — current and planned system architecture

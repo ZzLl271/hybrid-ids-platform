@@ -1,86 +1,74 @@
-# Architecture Diagrams
+## Current Data Flow
 
-This project uses two architecture diagrams to separate current implementation from the long-term system concept.
-
-## Current Phase 1 Architecture
-
-Draw.io source:
+The current implemented data flow is:
 
 ```text
-docs/phase1-architecture.drawio
+PCAP
+  ↓
+Suricata in Docker
+  ↓
+eve.json
+  ↓
+Flow / DNS / HTTP / TLS / Alert parsers
+  ↓
+JSON / JSONL / table / summary output
 ```
 
-This diagram shows the part currently implemented in this repository:
+Suricata reads an offline PCAP file and writes network events to eve.json.
+
+The Python parsers read that file and process one event type at a time.
+
+## Component Responsibilities
+
+- **Suricata:** reads an offline PCAP file and generates structured network events in `eve.json`.
+- **`eve.json`:** acts as the data boundary between Suricata and the Python processing layer.
+- **Python parsers:** read `eve.json` and extract one supported event type: Flow, DNS, HTTP, TLS, or Alert.
+- **Parser output:** can be printed as JSON, a readable table, a summary, or written as JSONL.
+- **Alert parser:** also applies a small checksum-noise label to known checksum-related alerts.
+
+## Data Boundaries and Interfaces
+
+The main interface between Suricata and the Python layer is `eve.json`.
+
+The parsers read newline-delimited JSON events from this file and produce either terminal output or normalized JSONL files.
+
+Real PCAP files, generated `eve.json` logs, and normalized outputs stay on the local homelab because they may contain private network metadata.
+
+The public repository uses the sanitized `samples/eve-demo.json` file for parser testing.
+
+## Key Decisions and Limitations
+
+I use Docker for Suricata so the analysis environment is easier to reproduce.
+
+I started with offline PCAP files instead of live traffic so I could test the data pipeline in a controlled way.
+
+The five event types currently use separate parsers because their fields are different. A shared cross-event schema has not been implemented yet.
+
+I also chose not to start anomaly scoring before the event format and feature data are defined.
+
+The current system is still limited to offline analysis, and the checksum-noise label is only a small prototype rule, not a general security conclusion.
+
+## Relationship to Planned Work
+
+The current parser layer is the starting point for the semester work.
+
+The planned sequence is:
 
 ```text
-PCAP -> Suricata Docker -> eve.json -> Python parsers -> summary / table / JSONL
+Current event-specific parsers
+  ↓
+Shared event schema
+  ↓
+Unified normalizer
+  ↓
+Feature extraction
+  ↓
+Reproducible feature dataset
+  ↓
+Basic anomaly scoring
+  ↓
+Suricata alerts + anomaly scores + related event context
 ```
+Only the parser layer is part of the current implemented architecture. The later components are planned semester work and should not be treated as completed until they are implemented and verified.
 
-## Core Semester Pipeline
-
-The [semester scope](semester-scope.md) defines the planned core deliverable:
-
-```text
-Suricata EVE events
--> event parsing
--> shared normalization
--> feature extraction and reproducible dataset
--> basic anomaly scoring and alert context
--> CLI / JSONL / CSV results and documented validation
-```
-
-Only ingestion and the event-specific parser layer are implemented at the
-[pre-semester baseline](semester-baseline.md). Normalization, feature
-extraction, scoring, and cross-event alert enrichment remain planned work.
-In this paragraph, normalization means the shared cross-event layer; each
-existing parser already performs its own field extraction and normalization.
-
-## Long-Term Architecture Concept
-
-Draw.io source:
-
-```text
-docs/final-architecture.drawio
-```
-
-This diagram preserves the larger system concept, including a backend API,
-storage services, a frontend dashboard, ML scoring, and alert management.
-The service layout, live/replayed-traffic capture, and model choice shown are
-future design ideas, not the current deployment or a binding semester plan.
-The current workflow uses offline PCAP analysis on the student's Ubuntu host.
-
-An older legend assigned solid blocks to the semester deliverable. That
-interpretation is superseded by [semester-scope.md](semester-scope.md).
-Colors and solid/dashed styling do not establish delivery commitments.
-FastAPI, PostgreSQL, Redis, React, and advanced explainability remain stretch
-goals or future work. Basic anomaly scoring does not require those services.
-
-## Current Integration Limits
-
-A source and sanitized-sample review on 2026-09-06 found the existing module
-layout suitable for the Phase 1 offline prototype. It identified these limits
-to address when implementing the planned next phase:
-
-- Each parser scans the input separately and collects matching records in
-  memory. The review did not benchmark large files or streaming operation.
-- Outputs use event-specific fields rather than a shared contract. In
-  particular, the DNS normalizer does not retain an input `flow_id`, and parser
-  outputs do not retain `event_type`. Cross-event correlation must preserve
-  the needed identifiers from the original EVE data and define a missing-ID
-  policy; it cannot assume every existing output already contains them.
-- The PCAP runner expects execution from the repository root and input files
-  under `data/pcaps/`, as shown in the README. It is not a general-purpose
-  runner for arbitrary input paths.
-- The runner can report success after its event-summary pipeline fails.
-  This reproduced reliability issue is recorded as
-  [TASK-001](tasks.md#task-001--propagate-failures-from-the-runners-event-summary-pipeline)
-  and remains unfixed.
-- The included sample demonstrates parser behavior; it is not a feature
-  dataset, an anomaly-scoring benchmark, or an end-to-end detection evaluation.
-- No automated test suite or CI workflow is present at the baseline.
-
-The review reran JSON stdout, summary, and pretty modes for all five parsers
-(15 successful invocations) and reproduced the DNS identifier omission with
-an in-memory input. It did not run Docker/Suricata, connect to the homelab, or
-exercise JSONL file writing. Homelab verification in the baseline is the
-student's separately confirmed work.
+See [scope.md](scope.md) for the planned deliverables and completion criteria.
