@@ -12,6 +12,12 @@ eve.json
 Flow / DNS / HTTP / TLS / Alert parsers
   ↓
 JSON / JSONL / table / summary output
+  ↓
+Current event-specific parsers
+  ↓
+Shared event schema
+  ↓
+Unified normalizer
 ```
 
 Suricata reads an offline PCAP file and writes network events to eve.json.
@@ -55,12 +61,6 @@ The current parser layer is the starting point for the semester work.
 The planned sequence is:
 
 ```text
-Current event-specific parsers
-  ↓
-Shared event schema
-  ↓
-Unified normalizer
-  ↓
 Feature extraction
   ↓
 Reproducible feature dataset
