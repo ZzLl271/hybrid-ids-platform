@@ -12,7 +12,7 @@ The project currently processes offline PCAP files with Suricata, parses Flow, D
 
 The current working pipeline is:
 
-`PCAP -> Suricata -> eve.json -> Event Parsers -> Shared Schema -> Unified Normalizer`
+`PCAP -> Suricata -> eve.json -> Event Parsers -> Unified Normalizer -> Shared Normalized Events`
 
 Completed:
 
@@ -24,7 +24,7 @@ Completed:
 
 Next:
 
-`Feature Schema -> Feature Extraction -> Feature Dataset -> Anomaly Scoring -> Hybrid Analysis`
+`Feature Schema -> Feature Extraction -> Feature Dataset -> Dataset Validation -> Anomaly Scoring -> Hybrid Analysis`
 
 ## Requirements
 
@@ -60,6 +60,8 @@ To process a PCAP with Suricata:
 scripts/run_suricata_pcap.sh data/pcaps/benign_test.pcap test-001
 ```
 
+## Unified Normalizer
+
 The unified normalizer is implemented in:
 
 ```text
@@ -72,6 +74,16 @@ Its main interface is:
 normalize_event(event_type, record)
 ```
 
+`record` must be one event-specific parser record, not raw `eve.json` data and not table or summary output.
+
+The caller must supply the parser context as `event_type`, for example:
+
+```python
+from backend.app.normalize_event import normalize_event
+
+shared_record = normalize_event("dns", dns_record)
+```
+
 Supported event types:
 
 ```text
@@ -81,6 +93,8 @@ http
 tls
 alert
 ```
+
+There is currently no separate CLI for the unified normalizer. The existing Quick Start commands run the event-specific parsers only.
 
 ## Shared Normalized Events
 
