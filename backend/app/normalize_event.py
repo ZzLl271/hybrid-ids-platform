@@ -29,6 +29,7 @@ def normalize_event(
             "flow_state": record.get("flow_state"),
             "flow_reason": record.get("flow_reason"),
             "alerted": record.get("alerted"),
+            "flow_start": record.get("flow_start"),
         }
 
     elif event_type == "dns":

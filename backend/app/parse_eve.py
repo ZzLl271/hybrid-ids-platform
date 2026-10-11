@@ -28,6 +28,7 @@ def normalize_flow(event: dict[str, Any]) -> dict[str, Any]:
         "flow_state": flow.get("state"),
         "flow_reason": flow.get("reason"),
         "alerted": flow.get("alerted", False),
+        "flow_start": flow.get("start"),
     }
 
 
