@@ -32,3 +32,6 @@ ml/models/*
 
 # OS
 .DS_Store
+
+# Feature extraction test datasets
+data/feature-tests/
