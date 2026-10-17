@@ -3,8 +3,6 @@ from collections import defaultdict
 from ipaddress import ip_address
 
 def get_window_start(flow_start: str) -> datetime:
-    """Return the start of the UTC-aligned 30-second window."""
-
     try:
         dt = datetime.strptime(
             flow_start, "%Y-%m-%dT%H:%M:%S.%f%z"
@@ -22,7 +20,6 @@ def get_window_start(flow_start: str) -> datetime:
     )
 
 def group_tcp_flows_by_window(events: list[dict]) -> dict:
-    """Group normalized TCP Flow events by 30-second UTC window."""
     windows = defaultdict(list)
 
     for event in events:
@@ -43,7 +40,6 @@ def group_tcp_flows_by_window(events: list[dict]) -> dict:
     return dict(windows)
 
 def count_tcp_flows_by_window(windows: dict, monitored_ip: str) -> dict:
-    """Count distinct TCP flows involving the monitored host."""
     counts = {}
 
     for window_start, flows in windows.items():
@@ -69,7 +65,6 @@ def count_tcp_flows_by_window(windows: dict, monitored_ip: str) -> dict:
 def count_inbound_tcp_flows_by_window(
     windows: dict, monitored_ip: str
 ) -> dict:
-    """Count distinct inbound TCP flows per window."""
     counts = {}
 
     for window_start, flows in windows.items():
@@ -95,7 +90,6 @@ def count_inbound_tcp_flows_by_window(
 def count_outbound_tcp_flows_by_window(
     windows: dict, monitored_ip: str
 ) -> dict:
-    """Count distinct outbound TCP flows per window."""
     counts = {}
 
     for window_start, flows in windows.items():
@@ -121,7 +115,6 @@ def count_outbound_tcp_flows_by_window(
 def count_inbound_unique_dest_ports_by_window(
     windows: dict, monitored_ip: str
 ) -> dict:
-    """Count unique TCP destination ports targeted by inbound flows."""
     counts = {}
 
     for window_start, flows in windows.items():
@@ -151,7 +144,6 @@ def count_inbound_unique_dest_ports_by_window(
 def count_outbound_unique_dest_ips_by_window(
     windows: dict, monitored_ip: str
 ) -> dict:
-    """Count unique destination IPs of outbound TCP flows."""
     counts = {}
 
     for window_start, flows in windows.items():
@@ -178,7 +170,6 @@ def count_outbound_unique_dest_ips_by_window(
 def count_inbound_max_unique_ports_by_window(
     windows: dict, monitored_ip: str
 ) -> dict:
-    """Maximum unique destination ports accessed by one inbound source."""
     counts = {}
 
     for window_start, flows in windows.items():
@@ -214,13 +205,101 @@ def count_inbound_max_unique_ports_by_window(
 
     return counts
 
+def count_inbound_unique_src_ips_by_window(
+    windows: dict, monitored_ip: str
+) -> dict:
+    counts = {}
+
+    for window_start, flows in windows.items():
+        src_ips = set()
+
+        for flow in flows:
+            if flow.get("dest_ip") != monitored_ip:
+                continue
+
+            src_ip = flow.get("src_ip")
+            if not isinstance(src_ip, str) or src_ip == monitored_ip:
+                continue
+
+            try:
+                src_ips.add(ip_address(src_ip))
+            except ValueError:
+                continue
+
+        counts[window_start] = len(src_ips)
+
+    return counts
+
+
+def count_outbound_unique_dest_ports_by_window(
+    windows: dict, monitored_ip: str
+) -> dict:
+    counts = {}
+
+    for window_start, flows in windows.items():
+        dest_ports = set()
+
+        for flow in flows:
+            if flow.get("src_ip") != monitored_ip:
+                continue
+            if flow.get("dest_ip") == monitored_ip:
+                continue
+
+            port = flow.get("dest_port")
+            if (
+                isinstance(port, int)
+                and not isinstance(port, bool)
+                and 1 <= port <= 65535
+            ):
+                dest_ports.add(port)
+
+        counts[window_start] = len(dest_ports)
+
+    return counts
+
+
+def count_outbound_max_unique_dest_ips_per_port_by_window(
+    windows: dict, monitored_ip: str
+) -> dict:
+    counts = {}
+
+    for window_start, flows in windows.items():
+        ips_by_port = {}
+
+        for flow in flows:
+            if flow.get("src_ip") != monitored_ip:
+                continue
+
+            dest_ip = flow.get("dest_ip")
+            if not isinstance(dest_ip, str) or dest_ip == monitored_ip:
+                continue
+
+            port = flow.get("dest_port")
+            if (
+                not isinstance(port, int)
+                or isinstance(port, bool)
+                or not 1 <= port <= 65535
+            ):
+                continue
+
+            try:
+                valid_ip = ip_address(dest_ip)
+            except ValueError:
+                continue
+
+            ips_by_port.setdefault(port, set()).add(valid_ip)
+
+        counts[window_start] = max(
+            (len(ips) for ips in ips_by_port.values()),
+            default=0,
+        )
+
+    return counts
+
+
 def build_feature_rows(windows: dict, monitored_ip: str) -> list[dict]:
-    """Combine six TCP features into one row per time window."""
 
     features = {
-        "tcp_flow_count":
-            count_tcp_flows_by_window(windows, monitored_ip),
-
         "tcp_inbound_flow_count":
             count_inbound_tcp_flows_by_window(windows, monitored_ip),
 
@@ -230,11 +309,22 @@ def build_feature_rows(windows: dict, monitored_ip: str) -> list[dict]:
         "tcp_inbound_unique_dest_port_count":
             count_inbound_unique_dest_ports_by_window(windows, monitored_ip),
 
+        "tcp_inbound_max_unique_dest_ports_per_src_ip":
+            count_inbound_max_unique_ports_by_window(windows, monitored_ip),
+
+        "tcp_inbound_unique_src_ip_count":
+            count_inbound_unique_src_ips_by_window(windows, monitored_ip),
+
         "tcp_outbound_unique_dest_ip_count":
             count_outbound_unique_dest_ips_by_window(windows, monitored_ip),
 
-        "tcp_inbound_max_unique_dest_ports_per_src_ip":
-            count_inbound_max_unique_ports_by_window(windows, monitored_ip),
+        "tcp_outbound_unique_dest_port_count":
+            count_outbound_unique_dest_ports_by_window(windows, monitored_ip),
+
+        "tcp_outbound_max_unique_dest_ips_per_dest_port":
+            count_outbound_max_unique_dest_ips_per_port_by_window(
+                windows, monitored_ip
+            ),
     }
 
     rows = []
@@ -253,7 +343,6 @@ def build_feature_rows(windows: dict, monitored_ip: str) -> list[dict]:
     return rows
 
 def save_feature_rows_csv(rows: list[dict], output_path: str) -> None:
-    """Save feature rows to a CSV file."""
     import csv
     from pathlib import Path
 
