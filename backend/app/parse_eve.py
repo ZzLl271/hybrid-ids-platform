@@ -32,7 +32,9 @@ def normalize_flow(event: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def parse_eve_flows(eve_path: Path) -> list[dict[str, Any]]:
+def parse_eve_flows(
+    eve_path: Path, *, strict: bool = False
+) -> list[dict[str, Any]]:
     flows = []
 
     with eve_path.open("r", encoding="utf-8") as f:
@@ -45,12 +47,21 @@ def parse_eve_flows(eve_path: Path) -> list[dict[str, Any]]:
             try:
                 event = json.loads(line)
             except json.JSONDecodeError as error:
+                if strict:
+                    raise ValueError(
+                        f"Invalid JSON on line {line_number}: {error.msg}"
+                    ) from error
                 print(
                     f"[!] Skipping invalid JSON on line {line_number}: {error}",
                     file=sys.stderr,
                 )
                 continue
 
+            if strict and not isinstance(event, dict):
+                raise ValueError(
+                    f"Invalid EVE event on line {line_number}: "
+                    "expected JSON object"
+                )
             if event.get("event_type") == "flow":
                 flows.append(normalize_flow(event))
 

@@ -6,13 +6,15 @@ This project is a prototype hybrid intrusion detection system.
 
 The goal is to combine Suricata rule-based detection with basic machine learning anomaly scoring.
 
-The project currently processes offline PCAP files with Suricata, parses Flow, DNS, HTTP, TLS, and Alert events from `eve.json`, converts the parser outputs into a shared normalized event structure, and extracts TCP flow features.
+The project currently processes offline PCAP files with Suricata, parses Flow, DNS, HTTP, TLS, and Alert events from `eve.json`, converts parser outputs into a shared normalized event structure, extracts TCP flow features, and exports reproducible CSV datasets.
 
 ## Current Status
 
 The current processing stages are:
 
-`PCAP -> Suricata -> eve.json -> Event Parsers -> Unified Normalizer -> TCP Feature Extraction -> Feature Rows / CSV`
+`PCAP -> Suricata -> eve.json -> Flow Parser -> TCP/Host Filter -> Unified Normalizer -> TCP Feature Extraction -> CSV`
+
+The other supported event parsers and the unified normalizer remain available for inspection and normalization outside the TCP-only dataset workflow.
 
 Completed:
 
@@ -23,10 +25,12 @@ Completed:
 - Normalization pipeline validation
 - TCP feature extraction with eight features in 30-second windows
 - Feature extraction demo test and CSV export validation
+- Reusable TCP v1 dataset builder with explicit input, monitored IP, and CSV output
+- Dataset builder reproducibility and strict JSON input tests (6 tests total)
 
 Next:
 
-`Reproducible Feature Dataset -> Dataset Validation -> Anomaly Scoring -> Hybrid Analysis`
+`Dataset Validation -> Anomaly Scoring -> Hybrid Analysis`
 
 ## Requirements
 
@@ -56,10 +60,19 @@ python3 backend/app/parse_tls.py samples/eve-demo.json --summary
 python3 backend/app/parse_alert.py samples/eve-demo.json --summary
 ```
 
-To test TCP feature extraction with the same sample:
+To generate a TCP v1 CSV dataset from the sanitized sample:
 
 ```bash
-python3 -m unittest discover -s tests -p 'test_feature_v1_demo.py' -v
+python3 -m scripts.build_feature_dataset \
+  --input samples/eve-demo.json \
+  --monitored-ip 192.0.2.10 \
+  --output data/feature-tests/eve-demo-v1.csv
+```
+
+To run the feature extraction and dataset builder tests:
+
+```bash
+python3 -m unittest discover -s tests -v
 ```
 
 To process a PCAP with Suricata:
@@ -102,7 +115,7 @@ tls
 alert
 ```
 
-There is currently no separate CLI for the unified normalizer. The parser summary commands above run the event-specific parsers only; the feature extraction test runs the parser, normalizer, and extractor together.
+There is no separate CLI for the unified normalizer. The parser summary commands above run the event-specific parsers only; the dataset builder and feature extraction tests compose the parser, normalizer, and extractor.
 
 ## Shared Normalized Events
 
@@ -133,7 +146,7 @@ The normalizer preserves values produced by the event-specific parsers and does 
 
 The eight v1 features describe inbound and outbound Flow counts, inbound port and source diversity, and outbound destination diversity. UDP Flow records are still parsed but are not included in TCP feature scoring.
 
-The included demo sample has six TCP Flow records, one UDP Flow record, and DNS, HTTP, TLS, and Alert events. The automated test checks the expected eight feature values, missing-field handling, and CSV export. This sample is for verification, not model training.
+The included demo sample has six TCP Flow records, one UDP Flow record, and DNS, HTTP, TLS, and Alert events. The feature extraction tests check the expected eight feature values, missing-field handling, and CSV export. The dataset builder selects TCP Flows involving the monitored IP before window grouping and rejects malformed EVE JSON input. The sample is for verification, not model training.
 
 ## Output and Verification
 
@@ -156,13 +169,13 @@ The unified normalization layer has been validated against `samples/eve-demo.jso
 - null/default preservation
 - unsupported event type handling
 
-The TCP feature demo test runs three tests and should finish with `OK`. It validates one 30-second window with the expected eight feature values and writes a CSV in a temporary directory.
+The current automated suite has six tests: three feature extraction tests and three dataset builder tests. The builder was tested with the sanitized demo and two local Homelab EVE runs; generated CSVs stay under `data/feature-tests/` and are ignored by Git. See [dataset-generation.md](docs/dataset-generation.md) for inputs, expected schema, and reproducibility checks.
 
 ## Limitations
 
 The project currently works with offline PCAP files and does not monitor live network traffic.
 
-Feature extraction is implemented, but a reusable feature dataset generation workflow, dataset validation, anomaly scoring, and hybrid analysis are not complete.
+TCP feature extraction and reusable CSV generation are implemented and locally tested. Exported rows represent observed-flow windows, not verified-complete capture windows. Dataset quality validation, anomaly scoring, and hybrid analysis are not complete.
 
 The backend API, database, and dashboard are outside the current core implementation.
 
@@ -174,3 +187,5 @@ The included `samples/eve-demo.json` is a small sanitized sample for parser, nor
 - `docs/scope.md` — semester work and project boundaries
 - `docs/architecture.md` — current and planned system architecture
 - `docs/shared-schema.md` — shared normalized event schema and data contract
+- `docs/feature-extract.md` — eight-feature TCP v1 design and extraction rules
+- `docs/dataset-generation.md` — reusable CSV generation workflow and limitations

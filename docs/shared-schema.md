@@ -75,6 +75,9 @@ This contract describes the current normalized output shape. The unified normali
 | `flow_state` | string | Yes | Missing key -> `null` | Flow state |
 | `flow_reason` | string | Yes | Missing key -> `null` | Reason the flow ended |
 | `alerted` | boolean | Yes | Missing key -> `false`; explicit `null` remains `null` | Whether the flow generated an alert |
+| `flow_start` | string | Yes | Missing key -> `null`; original value preserved | Suricata `flow.start`, used for TCP window assignment |
+
+The normalizer preserves `flow_start` in `metadata` without inferring a replacement. A TCP Flow selected for feature extraction must have a valid, parseable `metadata.flow_start`; missing or invalid values cause extraction to fail. This requirement belongs to feature extraction, not the shared normalizer.
 
 ### DNS
 

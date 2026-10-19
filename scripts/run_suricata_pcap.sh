@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -o pipefail
 
 PCAP_FILE="${1:-data/pcaps/benign_test.pcap}"
 RUN_NAME="${2:-test-001}"
