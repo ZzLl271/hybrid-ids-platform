@@ -6,13 +6,13 @@ This project is a prototype hybrid intrusion detection system.
 
 The goal is to combine Suricata rule-based detection with basic machine learning anomaly scoring.
 
-The project currently processes offline PCAP files with Suricata, parses Flow, DNS, HTTP, TLS, and Alert events from `eve.json`, and converts the parser outputs into a shared normalized event structure.
+The project currently processes offline PCAP files with Suricata, parses Flow, DNS, HTTP, TLS, and Alert events from `eve.json`, converts the parser outputs into a shared normalized event structure, and extracts TCP flow features.
 
 ## Current Status
 
-The current working pipeline is:
+The current processing stages are:
 
-`PCAP -> Suricata -> eve.json -> Event Parsers -> Unified Normalizer -> Shared Normalized Events`
+`PCAP -> Suricata -> eve.json -> Event Parsers -> Unified Normalizer -> TCP Feature Extraction -> Feature Rows / CSV`
 
 Completed:
 
@@ -21,14 +21,16 @@ Completed:
 - Shared normalized event schema and data contract
 - Unified event normalizer
 - Normalization pipeline validation
+- TCP feature extraction with eight features in 30-second windows
+- Feature extraction demo test and CSV export validation
 
 Next:
 
-`Feature Schema -> Feature Extraction -> Feature Dataset -> Dataset Validation -> Anomaly Scoring -> Hybrid Analysis`
+`Reproducible Feature Dataset -> Dataset Validation -> Anomaly Scoring -> Hybrid Analysis`
 
 ## Requirements
 
-For the Python parsers and normalizer:
+For the Python parsers, normalizer, feature extractor, and demo tests:
 
 - Python 3.10 or newer
 - No external Python packages are currently required
@@ -52,6 +54,12 @@ python3 backend/app/parse_dns.py samples/eve-demo.json --summary
 python3 backend/app/parse_http.py samples/eve-demo.json --summary
 python3 backend/app/parse_tls.py samples/eve-demo.json --summary
 python3 backend/app/parse_alert.py samples/eve-demo.json --summary
+```
+
+To test TCP feature extraction with the same sample:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_feature_v1_demo.py' -v
 ```
 
 To process a PCAP with Suricata:
@@ -94,7 +102,7 @@ tls
 alert
 ```
 
-There is currently no separate CLI for the unified normalizer. The existing Quick Start commands run the event-specific parsers only.
+There is currently no separate CLI for the unified normalizer. The parser summary commands above run the event-specific parsers only; the feature extraction test runs the parser, normalizer, and extractor together.
 
 ## Shared Normalized Events
 
@@ -119,6 +127,14 @@ Event-specific fields are stored inside `metadata`.
 
 The normalizer preserves values produced by the event-specific parsers and does not infer missing values.
 
+## Feature Extraction
+
+`backend/app/feature_extract.py` groups normalized TCP Flow records by the preserved Suricata `flow.start` timestamp into fixed, non-overlapping 30-second UTC windows. Each feature row describes one monitored host and one window.
+
+The eight v1 features describe inbound and outbound Flow counts, inbound port and source diversity, and outbound destination diversity. UDP Flow records are still parsed but are not included in TCP feature scoring.
+
+The included demo sample has six TCP Flow records, one UDP Flow record, and DNS, HTTP, TLS, and Alert events. The automated test checks the expected eight feature values, missing-field handling, and CSV export. This sample is for verification, not model training.
+
 ## Output and Verification
 
 The parser commands can print summaries for their matching event types.
@@ -140,15 +156,17 @@ The unified normalization layer has been validated against `samples/eve-demo.jso
 - null/default preservation
 - unsupported event type handling
 
+The TCP feature demo test runs three tests and should finish with `OK`. It validates one 30-second window with the expected eight feature values and writes a CSV in a temporary directory.
+
 ## Limitations
 
 The project currently works with offline PCAP files and does not monitor live network traffic.
 
-Feature extraction, feature dataset generation, anomaly scoring, and hybrid analysis are not implemented yet.
+Feature extraction is implemented, but a reusable feature dataset generation workflow, dataset validation, anomaly scoring, and hybrid analysis are not complete.
 
 The backend API, database, and dashboard are outside the current core implementation.
 
-The included `samples/eve-demo.json` is a small sanitized sample for parser and normalization verification. It is not a machine-learning training dataset.
+The included `samples/eve-demo.json` is a small sanitized sample for parser, normalization, and feature extraction verification. It is not a machine-learning training dataset.
 
 ## Documentation
 
