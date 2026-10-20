@@ -36,9 +36,13 @@ Unified normalizer
 Eight TCP v1 features
   ↓
 CSV dataset
+  ↓
+Dataset validator (schema / basic consistency)
+  ↓
+PASS / FAIL + informational window gaps
 ```
 
-The event-specific parsers can also print JSON, JSONL, table, or summary output for inspection and testing. The dataset builder operates offline; it does not perform anomaly scoring.
+The event-specific parsers can also print JSON, JSONL, table, or summary output for inspection and testing. Dataset generation and validation operate offline; neither performs anomaly scoring.
 
 ## Component Responsibilities
 
@@ -51,6 +55,7 @@ The event-specific parsers can also print JSON, JSONL, table, or summary output 
 - **Unified normalizer:** takes an event-specific parser record plus its `event_type` and restructures it into the shared normalized event format.
 - **Feature extractor:** groups normalized TCP Flow events by 30-second UTC windows and computes eight host-level features.
 - **Dataset builder:** selects TCP Flows involving the specified monitored host, reuses the parser, normalizer, and feature extractor, and exports ordered CSV rows.
+- **Dataset validator:** checks the exported CSV against the shared `FEATURE_DATASET_FIELDS` contract, verifies basic numerical/window constraints, and reports missing positions between observed rows; it does not inspect PCAP capture completeness.
 
 ## Data Boundaries and Interfaces
 
@@ -73,6 +78,13 @@ python3 -m scripts.build_feature_dataset \
   --output data/feature-tests/eve-demo-v1.csv
 ```
 
+The resulting CSV can be validated from the repository root:
+
+```bash
+python3 -m scripts.validate_feature_dataset \
+  --input data/feature-tests/eve-demo-v1.csv
+```
+
 Real PCAP files, generated `eve.json` logs, and local feature datasets stay on the homelab because they may contain private network metadata. The public repository uses the sanitized `samples/eve-demo.json` for testing.
 
 ## Key Decisions and Limitations
@@ -85,22 +97,22 @@ The five event types still use separate parsers because their source fields diff
 
 The normalizer restructures parser output and does not infer missing values from ports, event type, or other fields. The TCP v1 builder filters to the specified monitored host and uses a simplified endpoint-orientation rule for inbound and outbound Flows.
 
-The current feature dataset contains windows with observed TCP Flow starts. It does not establish complete capture coverage, add zero-traffic windows, or validate ML training suitability.
+The current feature dataset contains windows with observed TCP Flow starts. The separate CSV validator checks structure and basic feature consistency, but neither component establishes complete capture coverage, adds zero-traffic windows, verifies attack labels, or validates ML training suitability.
 
 The current system is still limited to offline analysis, and the checksum-noise label is only a small prototype rule, not a general security conclusion.
 
 ## Relationship to Planned Work
 
-The parser layer, shared schema, normalizer, eight-feature TCP extraction, and reproducible CSV builder are implemented and have passed local tests.
+The parser layer, shared schema, normalizer, eight-feature TCP extraction, reproducible CSV builder, and CSV dataset validator are implemented. The latest reported local suite passed **16 tests**, and seven local Homelab/CIC-IDS2017 CSVs passed validation (296 observed-flow rows).
 
 The next planned sequence is:
 
 ```text
-Dataset validation and capture completeness
+Capture completeness, zero-Flow policy, and window labels
   ↓
 Basic anomaly scoring
   ↓
 Suricata alerts + anomaly scores + related event context
 ```
 
-Anomaly scoring and hybrid analysis are not yet implemented. See [scope.md](scope.md) for planned deliverables, [feature-extract.md](feature-extract.md) for the feature design, and [dataset-generation.md](dataset-generation.md) for dataset generation.
+Anomaly scoring and hybrid analysis are not yet implemented. See [scope.md](scope.md) for planned deliverables, [feature-extract.md](feature-extract.md) for the feature design, [dataset-generation.md](dataset-generation.md) for CSV generation, and [dataset-validation.md](dataset-validation.md) for the validation boundary.

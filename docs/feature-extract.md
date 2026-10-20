@@ -68,7 +68,7 @@ The eight values, in table order, are **3, 3, 3, 2, 2, 3, 2, 2**. For example, t
 - **Distinguish empty from unobserved.** Grouping normally produces windows with observed TCP Flow starts. A zero-Flow window must be added explicitly and supported by trustworthy capture coverage; an incomplete capture is not proof of zero activity.
 - **Keep scope manageable.** This is offline, TCP-only, host-scoped analysis. Full-LAN coverage, real-time detection, payload inspection and deep learning are outside this time.
 
-The present feature functions do **not** validate every input field identically. Cross-feature consistency and capture coverage still need dedicated dataset checks.
+The present feature functions do **not** validate every input field identically. A separate dataset validator now checks six basic cross-feature numerical bounds in exported CSVs; it does **not** verify the original Flow records or capture coverage. See [dataset-validation.md](dataset-validation.md).
 ## 5. Changes to Existing Components
 
 Before Task #10, the project already had Suricata PCAP processing, five event-specific parsers, and a shared normalizer. To support the chosen host-window feature design, I made the following changes:
@@ -91,12 +91,13 @@ The results below were reported in terminal output during earlier local experime
 | Normal SSH traffic (`tcp-baseline-004`) | `data/pcaps/tcp-baseline-004.pcap`, `data/eve-runs/tcp-baseline-004/eve.json` | Windows PowerShell SSH to Ubuntu, plus background traffic; **5 candidate windows**. Inbound unique-source count: 0–1; max outbound IPs per port: 1–3. |
 | Controlled scan (`inbound-scan-001`) | `data/pcaps/inbound-scan-001.pcap`, `data/eve-runs/inbound-scan-001/eve.json` | Windows Nmap targeting **21, 22, 80, 443, 8080**; **1 short window**, 9 inbound Flow IDs, 5 distinct inbound ports, 1 source. |
 
-A manually executed regression script previously printed `PASS` for all three runs and checked that five established feature calculations matched earlier local reference CSVs. The console output is **not** a persisted, independently repeatable test artifact. Any later `jq` inspection of EVE would only check the selected raw fields: it would not by itself validate full windows, host filtering, deduplication or all eight computations. A repeatable dataset-generation and validation test is still needed.
+A manually executed regression script previously printed `PASS` for all three runs and checked that five established feature calculations matched earlier local reference CSVs. That historical console output is **not** a persisted, independently repeatable test artifact. Later work added reproducible CSV generation and automated tests, but the raw-Flow spot checks and CSV validator still do not independently prove full capture coverage or every feature calculation.
 
-**Remaining work**
-- **#12 — Reproducible dataset:** save a repeatable normalized-event-to-CSV command, rebuild current eight-feature CSVs, and record the input run, monitored IP, chosen windows and expected output.
-- **#13 — Dataset validation:** verify capture coverage, field rules, empty-window handling and row consistency; add representative normal and controlled-anomaly experiments.
-- **ML scoring:** evaluate which of the eight fields are helpful, using separate normal and controlled-anomaly data; report false positives and limitations rather than assuming feature counts imply detection accuracy.
+**Follow-on status and remaining work**
+- **#12 — Reproducible dataset:** implemented in `scripts/build_feature_dataset.py` with a fixed `FEATURE_DATASET_FIELDS` CSV schema; see [dataset-generation.md](dataset-generation.md).
+- **#13 — Dataset validation:** `scripts/validate_feature_dataset.py` and ten dedicated tests now check CSV structure and basic consistency. Seven local datasets passed and the full local suite reported **16 tests passing**; capture completeness and verified zero-Flow window handling are **not** established. See [dataset-validation.md](dataset-validation.md).
+- **Data preparation:** establish defensible capture coverage, window-level labels, provenance, and train/test partitions before scoring.
+- **ML scoring:** evaluate which of the eight fields are helpful using separated normal and attack-candidate samples; report false positives and limitations rather than assuming feature counts imply detection accuracy.
 - **Known design limitations:** 30-second windows can miss slower behavior; host-level rows mix remote sources; source/destination orientation does not always identify the initiator.
 
 This document records the **design and its evidence**.

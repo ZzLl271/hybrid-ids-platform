@@ -2,6 +2,20 @@ from datetime import datetime, timezone
 from collections import defaultdict
 from ipaddress import ip_address
 
+
+FEATURE_DATASET_FIELDS = (
+    "window_start",
+    "monitored_ip",
+    "tcp_inbound_flow_count",
+    "tcp_outbound_flow_count",
+    "tcp_inbound_unique_dest_port_count",
+    "tcp_inbound_max_unique_dest_ports_per_src_ip",
+    "tcp_inbound_unique_src_ip_count",
+    "tcp_outbound_unique_dest_ip_count",
+    "tcp_outbound_unique_dest_port_count",
+    "tcp_outbound_max_unique_dest_ips_per_dest_port",
+)
+
 def get_window_start(flow_start: str) -> datetime:
     try:
         dt = datetime.strptime(
@@ -353,6 +367,6 @@ def save_feature_rows_csv(rows: list[dict], output_path: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
     with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=FEATURE_DATASET_FIELDS)
         writer.writeheader()
         writer.writerows(rows)

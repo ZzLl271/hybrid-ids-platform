@@ -6,13 +6,13 @@ This project is a prototype hybrid intrusion detection system.
 
 The goal is to combine Suricata rule-based detection with basic machine learning anomaly scoring.
 
-The project currently processes offline PCAP files with Suricata, parses Flow, DNS, HTTP, TLS, and Alert events from `eve.json`, converts parser outputs into a shared normalized event structure, extracts TCP flow features, and exports reproducible CSV datasets.
+The project currently processes offline PCAP files with Suricata, parses Flow, DNS, HTTP, TLS, and Alert events from `eve.json`, converts parser outputs into a shared normalized event structure, extracts TCP flow features, exports reproducible CSV datasets, and validates their structure and basic consistency.
 
 ## Current Status
 
 The current processing stages are:
 
-`PCAP -> Suricata -> eve.json -> Flow Parser -> TCP/Host Filter -> Unified Normalizer -> TCP Feature Extraction -> CSV`
+`PCAP -> Suricata -> eve.json -> Flow Parser -> TCP/Host Filter -> Unified Normalizer -> TCP Feature Extraction -> CSV -> Dataset Validation`
 
 The other supported event parsers and the unified normalizer remain available for inspection and normalization outside the TCP-only dataset workflow.
 
@@ -26,11 +26,14 @@ Completed:
 - TCP feature extraction with eight features in 30-second windows
 - Feature extraction demo test and CSV export validation
 - Reusable TCP v1 dataset builder with explicit input, monitored IP, and CSV output
-- Dataset builder reproducibility and strict JSON input tests (6 tests total)
+- Dataset builder reproducibility and strict JSON input tests
+- Shared ten-column TCP v1 CSV schema and standalone dataset validator
+- Schema, value, UTC-window, duplicate-window, ordering, and feature-consistency checks
+- Dataset validator tests and local validation of seven Homelab/CIC-IDS2017 CSV datasets (16 automated tests total)
 
 Next:
 
-`Dataset Validation -> Anomaly Scoring -> Hybrid Analysis`
+`Capture Completeness and Window Labels -> Anomaly Scoring -> Hybrid Analysis`
 
 ## Requirements
 
@@ -69,7 +72,14 @@ python3 -m scripts.build_feature_dataset \
   --output data/feature-tests/eve-demo-v1.csv
 ```
 
-To run the feature extraction and dataset builder tests:
+To validate the exported demo CSV:
+
+```bash
+python3 -m scripts.validate_feature_dataset \
+  --input data/feature-tests/eve-demo-v1.csv
+```
+
+To run the feature extraction, dataset builder, and dataset validator tests:
 
 ```bash
 python3 -m unittest discover -s tests -v
@@ -144,7 +154,7 @@ The normalizer preserves values produced by the event-specific parsers and does 
 
 `backend/app/feature_extract.py` groups normalized TCP Flow records by the preserved Suricata `flow.start` timestamp into fixed, non-overlapping 30-second UTC windows. Each feature row describes one monitored host and one window.
 
-The eight v1 features describe inbound and outbound Flow counts, inbound port and source diversity, and outbound destination diversity. UDP Flow records are still parsed but are not included in TCP feature scoring.
+The eight v1 features describe inbound and outbound Flow counts, inbound port and source diversity, and outbound destination diversity. The fixed CSV column order is defined by `FEATURE_DATASET_FIELDS` in `backend/app/feature_extract.py`. UDP Flow records are still parsed but are not included in TCP feature scoring.
 
 The included demo sample has six TCP Flow records, one UDP Flow record, and DNS, HTTP, TLS, and Alert events. The feature extraction tests check the expected eight feature values, missing-field handling, and CSV export. The dataset builder selects TCP Flows involving the monitored IP before window grouping and rejects malformed EVE JSON input. The sample is for verification, not model training.
 
@@ -169,13 +179,13 @@ The unified normalization layer has been validated against `samples/eve-demo.jso
 - null/default preservation
 - unsupported event type handling
 
-The current automated suite has six tests: three feature extraction tests and three dataset builder tests. The builder was tested with the sanitized demo and two local Homelab EVE runs; generated CSVs stay under `data/feature-tests/` and are ignored by Git. See [dataset-generation.md](docs/dataset-generation.md) for inputs, expected schema, and reproducibility checks.
+The latest reported local automated suite passed **16 tests**: three feature extraction, three dataset builder, and ten dataset validator tests. The validator also reported **PASS** on seven local Homelab and CIC-IDS2017 CSVs (296 observed-flow rows in total). These local datasets are not part of the public repository; generated CSVs remain under `data/feature-tests/`, ignored by Git. See [dataset-generation.md](docs/dataset-generation.md) for generation and [dataset-validation.md](docs/dataset-validation.md) for checks, evidence, and limitations.
 
 ## Limitations
 
 The project currently works with offline PCAP files and does not monitor live network traffic.
 
-TCP feature extraction and reusable CSV generation are implemented and locally tested. Exported rows represent observed-flow windows, not verified-complete capture windows. Dataset quality validation, anomaly scoring, and hybrid analysis are not complete.
+TCP feature extraction, reproducible CSV generation, and basic CSV structure/consistency validation are implemented and locally tested. Exported rows represent **observed-flow windows**, not verified-complete capture windows; a validator PASS does not establish full capture coverage, correct attack labels, or ML training suitability. Capture-completeness policy, window labeling, anomaly scoring, and hybrid analysis remain unfinished.
 
 The backend API, database, and dashboard are outside the current core implementation.
 
@@ -189,3 +199,4 @@ The included `samples/eve-demo.json` is a small sanitized sample for parser, nor
 - `docs/shared-schema.md` — shared normalized event schema and data contract
 - `docs/feature-extract.md` — eight-feature TCP v1 design and extraction rules
 - `docs/dataset-generation.md` — reusable CSV generation workflow and limitations
+- `docs/dataset-validation.md` — CSV validation rules, local evidence, and outstanding coverage/labeling work
