@@ -27,7 +27,10 @@ CONSISTENCY_RULES = (
      "tcp_outbound_unique_dest_ip_count"),
 )
 
-
+"""Check CSV structure and consistency; return 0 on success, otherwise 1.
+PASS does not establish capture completeness or correct attack labels.
+Window gaps are informational and do not establish zero traffic.
+"""
 def validate_dataset(path: Path) -> int:
     errors = []
     windows_by_host = defaultdict(list)

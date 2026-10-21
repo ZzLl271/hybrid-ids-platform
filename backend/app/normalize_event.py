@@ -11,7 +11,10 @@ SUPPORTED_EVENT_TYPES = {
     "alert",
 }
 
-
+"""Reshape one event-specific parser record into the shared event schema.
+record must be parser output, not a raw EVE JSON object.
+Preserve parser defaults; absent fields remain None without inference.
+"""
 def normalize_event(
     event_type: str,
     record: dict[str, Any],

@@ -13,7 +13,9 @@ CHECKSUM_SIGNATURE_IDS = {
     2200075,  # SURICATA UDPv4 invalid checksum
 }
 
-
+"""Tag checksum-related alerts using a prototype noise heuristic.
+This label does not establish that an alert is benign.
+"""
 def classify_noise(alert: dict[str, Any]) -> tuple[bool, str | None]:
     signature_id = alert.get("signature_id")
     signature = alert.get("signature") or ""

@@ -1,3 +1,8 @@
+"""Compute TCP v1 host-window features; see docs/feature-extract.md.
+Inbound means remote -> monitored host; outbound means the reverse.
+Direction follows recorded endpoints, not a verified TCP initiator.
+Flow counts use distinct flow_id values per window and direction.
+"""
 from datetime import datetime, timezone
 from collections import defaultdict
 from ipaddress import ip_address
@@ -33,6 +38,12 @@ def get_window_start(flow_start: str) -> datetime:
         microsecond=0,
     )
 
+"""Map 30-second UTC window starts to normalized TCP Flow records.
+
+Use metadata.flow_start because the EVE timestamp may differ.
+A flow belongs to its start window, not every window it remains active.
+Only observed windows are returned; missing windows do not imply zero traffic.
+"""
 def group_tcp_flows_by_window(events: list[dict]) -> dict:
     windows = defaultdict(list)
 

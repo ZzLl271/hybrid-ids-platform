@@ -31,7 +31,8 @@ def normalize_flow(event: dict[str, Any]) -> dict[str, Any]:
         "flow_start": flow.get("start"),
     }
 
-
+# Dataset builds enable strict mode to fail rather than skip invalid JSON.
+# Strictness checks JSON syntax and top-level objects, not the full EVE schema.
 def parse_eve_flows(
     eve_path: Path, *, strict: bool = False
 ) -> list[dict[str, Any]]:

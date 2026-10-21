@@ -34,6 +34,8 @@ def main() -> None:
     except ValueError as error:
         parser.error(str(error))
 
+# Keep flows with exactly one endpoint equal to the monitored host.
+# Exclude unrelated flows and self-to-self records.
     monitored_flows = [
         normalize_event("flow", flow)
         for flow in parsed_flows
